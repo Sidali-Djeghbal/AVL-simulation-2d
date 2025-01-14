@@ -85,3 +85,28 @@ button:hover {
     color: white;
     font-size: 14px;
 }
+
+@media screen and (max-width: 800px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    canvas {
+        width: 90%;
+        height: 90%;
+    }
+
+    .inputs {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    input[type="text"] {
+        width: 90%;
+    }
+
+    button {
+        width: 90%;
+    }
+    
+}
