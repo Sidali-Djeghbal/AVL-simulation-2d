@@ -5,7 +5,6 @@
     document.getElementById("add").onclick = addValue;
     document.getElementById("search").onclick = searchValue;
     document.getElementById("delete").onclick = deleteValue;
-    document.getElementById("array").onclick = popup;
 
     function animateNodePosition(node, targetX, targetY, duration = 500) {
         const startX = node.x;
@@ -138,16 +137,4 @@
         avl.ctx.fillText(balanceFactor, node.x + 45, node.y - 10);
     }
 
-    function popup() {
-        const popupContainer = document.querySelector(".popup-container");
-        const closeBtn = document.querySelector(".close-btn");
-        const popupMessage = document.getElementById("popup-message");
-
-        const arr = [];
-        avl.inOrder((node) => arr.push(node.value));
-        popupMessage.textContent = "Ordered list: [" + arr.join(", ") + "]";
-        popupContainer.classList.add("active");
-
-        closeBtn.onclick = () => popupContainer.classList.remove("active");
-    }
 })();

@@ -76,7 +76,7 @@ button:hover {
     background-color: red;
 }
 
-#add, #search, #delete, #array {
+#add, #search, #delete {
     color: black;
 }
 
