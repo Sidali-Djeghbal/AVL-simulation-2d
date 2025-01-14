@@ -1,270 +1,191 @@
-// Class representing a single node in the AVL tree
 class Node {
-	constructor(value) {
-		this.value = value; // Value stored in the node
-		this.left = null; // Reference to the left child node
-		this.right = null; // Reference to the right child node
-		this.height = 1; // Height of the node (used for balancing)
-		this.x = 0; // X-coordinate for graphical representation
-		this.y = 0; // Y-coordinate for graphical representation
-	}
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+        this.x = 0;
+        this.y = 0;
+    }
 }
 
-// Class representing the AVL Tree
 class AVLTree {
-	constructor() {
-		this.root = null; // Root of the tree
-		this.canvas = document.getElementById("canvas"); // Canvas element for drawing
-		this.ctx = this.canvas.getContext("2d"); // Context for 2D drawing
-	}
+    constructor() {
+        this.root = null;
+        this.canvas = document.getElementById("canvas");
+        this.ctx = this.canvas.getContext("2d");
+    }
 
-	// Get the height of a node (null nodes have height 0)
-	getHeight(node) {
-		return node ? node.height : 0;
-	}
+    getHeight(node) {
+        return node ? node.height : 0;
+    }
 
-	// Calculate the balance factor of a node
-	getBalanceFactor(node) {
-		return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
-	}
+    getBalanceFactor(node) {
+        return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
+    }
 
-	// Perform a right rotation to balance the tree
-	rightRotate(y) {
-		const x = y.left; // Left child becomes the new root
-		const T2 = x.right; // Temporarily store the right subtree of x
+    rightRotate(y) {
+        const x = y.left;
+        const T2 = x.right;
+        x.right = y;
+        y.left = T2;
+        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+        x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
+        return x;
+    }
 
-		// Perform rotation
-		x.right = y;
-		y.left = T2;
+    leftRotate(x) {
+        const y = x.right;
+        const T2 = y.left;
+        y.left = x;
+        x.right = T2;
+        x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
+        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+        return y;
+    }
 
-		// Update heights
-		y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
-		x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
+    compareWords(word1, word2) {
+        return word1.localeCompare(word2);
+    }
 
-		return x; // Return the new root
-	}
+    insert(node, value) {
+        if (!node) return new Node(value);
+        const comparison = this.compareWords(value, node.value);
+        if (comparison < 0) {
+            node.left = this.insert(node.left, value);
+        } else if (comparison > 0) {
+            node.right = this.insert(node.right, value);
+        } else {
+            return node;
+        }
 
-	// Perform a left rotation to balance the tree
-	leftRotate(x) {
-		const y = x.right; // Right child becomes the new root
-		const T2 = y.left; // Temporarily store the left subtree of y
+        node.height =
+            1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+        const balance = this.getBalanceFactor(node);
 
-		// Perform rotation
-		y.left = x;
-		x.right = T2;
+        if (balance > 1 && this.compareWords(value, node.left.value) < 0) return this.rightRotate(node);
+        if (balance < -1 && this.compareWords(value, node.right.value) > 0) return this.leftRotate(node);
+        if (balance > 1 && this.compareWords(value, node.left.value) > 0) {
+            node.left = this.leftRotate(node.left);
+            return this.rightRotate(node);
+        }
+        if (balance < -1 && this.compareWords(value, node.right.value) < 0) {
+            node.right = this.rightRotate(node.right);
+            return this.leftRotate(node);
+        }
+        return node;
+    }
 
-		// Update heights
-		x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
-		y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+    delete(node, value) {
+        if (!node) return node;
 
-		return y; // Return the new root
-	}
+        const comparison = this.compareWords(value, node.value);
+        if (comparison < 0) {
+            node.left = this.delete(node.left, value);
+        } else if (comparison > 0) {
+            node.right = this.delete(node.right, value);
+        } else {
+            if (!node.left || !node.right) {
+                node = node.left ? node.left : node.right;
+            } else {
+                const minValueNode = this.getMinValueNode(node.right);
+                node.value = minValueNode.value;
+                node.right = this.delete(node.right, minValueNode.value);
+            }
+        }
 
-	// Compare two words character by character
-	compareWords(word1, word2) {
-		const minLength = Math.min(word1.length, word2.length);
-		for (let i = 0; i < minLength; i++) {
-			if (word1.charCodeAt(i) < word2.charCodeAt(i)) return -1;
-			if (word1.charCodeAt(i) > word2.charCodeAt(i)) return 1;
-		}
-		return word1.length - word2.length;
-	}
+        if (!node) return node;
 
-	// Insert a value into the AVL tree
-	insert(node, value) {
-		if (!node) return new Node(value); // Create a new node if the current node is null
+        node.height =
+            1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+        const balance = this.getBalanceFactor(node);
 
-		// Traverse the tree to find the correct position for insertion
-		const comparison = this.compareWords(value, node.value);
-		if (comparison < 0) {
-			node.left = this.insert(node.left, value);
-		} else if (comparison > 0) {
-			node.right = this.insert(node.right, value);
-		} else {
-			return node; // Duplicate values are not allowed
-		}
+        if (balance > 1 && this.getBalanceFactor(node.left) >= 0)
+            return this.rightRotate(node);
+        if (balance > 1 && this.getBalanceFactor(node.left) < 0) {
+            node.left = this.leftRotate(node.left);
+            return this.rightRotate(node);
+        }
+        if (balance < -1 && this.getBalanceFactor(node.right) <= 0)
+            return this.leftRotate(node);
+        if (balance < -1 && this.getBalanceFactor(node.right) > 0) {
+            node.right = this.rightRotate(node.right);
+            return this.leftRotate(node);
+        }
 
-		// Update the height of the current node
-		node.height =
-			1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+        return node;
+    }
 
-		// Get the balance factor to check if the node is unbalanced
-		const balance = this.getBalanceFactor(node);
+    getMinValueNode(node) {
+        let current = node;
+        while (current.left) {
+            current = current.left;
+        }
+        return current;
+    }
 
-		// Perform rotations if necessary
-		if (balance > 1 && this.compareWords(value, node.left.value) < 0) return this.rightRotate(node);
-		if (balance < -1 && this.compareWords(value, node.right.value) > 0) return this.leftRotate(node);
-		if (balance > 1 && this.compareWords(value, node.left.value) > 0) {
-			node.left = this.leftRotate(node.left);
-			return this.rightRotate(node);
-		}
-		if (balance < -1 && this.compareWords(value, node.right.value) < 0) {
-			node.right = this.rightRotate(node.right);
-			return this.leftRotate(node);
-		}
+    drawTree(node, x, y, dx) {
+        if (node) {
+            node.x = x;
+            node.y = y;
+            this.drawTree(node.left, x - dx, y + 100, dx / 2);
+            this.drawTree(node.right, x + dx, y + 100, dx / 2);
+        }
+    }
 
-		return node; // Return the unchanged node
-	}
+    drawNode(node) {
+        if (!node) return;
+        const rectWidth = 60;
+        const rectHeight = 40;
+        this.ctx.fillStyle = "#00A";
+        this.ctx.fillRect(node.x - rectWidth / 2, node.y - rectHeight / 2, rectWidth, rectHeight);
+        this.ctx.strokeRect(node.x - rectWidth / 2, node.y - rectHeight / 2, rectWidth, rectHeight);
+        this.ctx.fillStyle = "white";
+        this.ctx.font = "20px Arial";
+        this.ctx.textAlign = "center";
+        this.ctx.fillText(node.value, node.x, node.y);
 
-	// Delete a value from the AVL tree
-	delete(node, value) {
-		if (!node) return node; // If the node is null, return it
+        // Draw balance factor square
+        const balanceFactor = this.getBalanceFactor(node);
+        this.ctx.fillStyle = "#fff";
+        this.ctx.fillRect(node.x + 40, node.y - 25, 25, 25);
+        this.ctx.strokeRect(node.x + 40, node.y - 25, 25, 25);
+        this.ctx.fillStyle = "#000";
+        this.ctx.fillText(balanceFactor, node.x + 50, node.y - 10);
+    }
 
-		// Traverse the tree to find the node to delete
-		const comparison = this.compareWords(value, node.value);
-		if (comparison < 0) {
-			node.left = this.delete(node.left, value);
-		} else if (comparison > 0) {
-			node.right = this.delete(node.right, value);
-		} else {
-			// Node with only one child or no child
-			if (!node.left || !node.right) {
-				node = node.left ? node.left : node.right;
-			} else {
-				// Node with two children: Get the inorder successor
-				const minValueNode = this.getMinValueNode(node.right);
-				node.value = minValueNode.value; // Copy the value of the successor
-				node.right = this.delete(node.right, minValueNode.value); // Delete the successor
-			}
-		}
+    drawConnections(node) {
+        if (node.left) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(node.x, node.y);
+            this.ctx.lineTo(node.left.x, node.left.y);
+            this.ctx.stroke();
+            this.drawConnections(node.left);
+        }
+        if (node.right) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(node.x, node.y);
+            this.ctx.lineTo(node.right.x, node.right.y);
+            this.ctx.stroke();
+            this.drawConnections(node.right);
+        }
+    }
 
-		if (!node) return node; // If the tree had only one node
+    drawFullTree() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (this.root) {
+            this.drawTree(this.root, this.canvas.width / 2, 50, this.canvas.width / 4);
+            this.drawConnections(this.root);
+            this.drawAllNodes(this.root);
+        }
+    }
 
-		// Update height and balance the tree
-		node.height =
-			1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
-		const balance = this.getBalanceFactor(node);
+    drawAllNodes(node) {
+        if (node) {
+            this.drawNode(node);
+            this.drawAllNodes(node.left);
+            this.drawAllNodes(node.right);
+        }
+    }
 
-		// Perform rotations if necessary
-		if (balance > 1 && this.getBalanceFactor(node.left) >= 0)
-			return this.rightRotate(node);
-		if (balance > 1 && this.getBalanceFactor(node.left) < 0) {
-			node.left = this.leftRotate(node.left);
-			return this.rightRotate(node);
-		}
-		if (balance < -1 && this.getBalanceFactor(node.right) <= 0)
-			return this.leftRotate(node);
-		if (balance < -1 && this.getBalanceFactor(node.right) > 0) {
-			node.right = this.rightRotate(node.right);
-			return this.leftRotate(node);
-		}
-
-		return node;
-	}
-
-	// Find the node with the smallest value (used in deletion)
-	getMinValueNode(node) {
-		let current = node;
-		while (current.left) {
-			current = current.left;
-		}
-		return current;
-	}
-
-	// Search for a value in the tree
-	search(node, value) {
-		if (!node) console.log(`${value} not found in the tree`); // If node is null, value not found
-		const comparison = this.compareWords(value, node.value);
-		if (comparison === 0) return node; // Value found
-		return comparison < 0
-			? this.search(node.left, value)
-			: this.search(node.right, value);
-	}
-
-	// In-order traversal of the tree
-	inOrder(cb, root = this.root) {
-		if (cb == null)
-			throw new Error(
-				"Error in Tree class: Called inOrder but didn't provide callback!"
-			);
-
-		if (root == null) return;
-
-		this.inOrder(cb, root.left);
-		cb(root);
-		this.inOrder(cb, root.right);
-	}
-
-	// Draw the entire tree
-	drawTree(node, x, y, dx) {
-		if (node) {
-			node.x = x; // Set the x-coordinate
-			node.y = y; // Set the y-coordinate
-			this.drawTree(node.left, x - dx, y + 60, dx / 2); // Draw the left subtree
-			this.drawTree(node.right, x + dx, y + 60, dx / 2); // Draw the right subtree
-		}
-	}
-
-	// Draw a single node
-	drawNode(node) {
-		if (!node) return;
-		const radius = 20; // Radius of the node circle
-		const depth = Math.floor(node.y / 60); // Depth of the node
-		const colors = [
-			"#FF5733",
-			"#008000",
-			"#3357FF",
-			"#FFD433",
-			"#D433FF",
-			"#33FFF5",
-		]; // Colors for different depths
-		const color = colors[depth % colors.length];
-
-		this.ctx.beginPath();
-		this.ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI); // Draw the circle
-		this.ctx.fillStyle = color; // Fill with depth-specific color
-		this.ctx.fill();
-		this.ctx.stroke();
-
-		this.ctx.fillStyle = "white"; // Set text color
-		this.ctx.font = "16px Arial";
-		this.ctx.textAlign = "center";
-		this.ctx.textBaseline = "middle";
-		this.ctx.fillText(node.value, node.x, node.y); // Draw the node value
-		this.ctx.closePath();
-	}
-
-	// Draw connections (edges) between nodes
-	drawConnections(node) {
-		if (node.left) {
-			this.ctx.beginPath();
-			this.ctx.moveTo(node.x, node.y); // Start from the current node
-			this.ctx.lineTo(node.left.x, node.left.y); // Draw line to the left child
-			this.ctx.stroke();
-			this.ctx.closePath();
-			this.drawConnections(node.left); // Recursively draw for the left subtree
-		}
-		if (node.right) {
-			this.ctx.beginPath();
-			this.ctx.moveTo(node.x, node.y); // Start from the current node
-			this.ctx.lineTo(node.right.x, node.right.y); // Draw line to the right child
-			this.ctx.stroke();
-			this.ctx.closePath();
-			this.drawConnections(node.right); // Recursively draw for the right subtree
-		}
-	}
-
-	// Draw the full tree
-	drawFullTree() {
-		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // Clear the canvas
-		if (this.root) {
-			this.drawTree(
-				this.root,
-				this.canvas.width / 2,
-				30,
-				this.canvas.width / 4
-			); // Set initial position
-			this.drawConnections(this.root); // Draw edges
-			this.drawAllNodes(this.root); // Draw nodes
-		}
-	}
-
-	// Draw all nodes recursively
-	drawAllNodes(node) {
-		if (node) {
-			this.drawNode(node); // Draw the current node
-			this.drawAllNodes(node.left); // Draw the left subtree
-			this.drawAllNodes(node.right); // Draw the right subtree
-		}
-	}
 }
