@@ -2,45 +2,31 @@
     const avl = new AVLTree();
     const numberInput = document.getElementById("nodeValue");
 
-    document.getElementById("add").onclick = addValue;
-    document.getElementById("search").onclick = searchValue;
-    document.getElementById("delete").onclick = deleteValue;
-    document.getElementById("array").onclick = popup;
-
-    function addValue() {
+    document.getElementById("add").onclick = async () => {
         const word = numberInput.value.trim();
         if (!word) return;
 
-        avl.root = avl.insert(avl.root, word);
-        avl.drawFullTree();
-    }
+        await avl.insertDynamic(word); // Dynamic insertion process
+    };
 
-    function searchValue() {
+    document.getElementById("search").onclick = () => {
         const word = numberInput.value.trim();
         if (!word) return;
 
         const node = avl.search(avl.root, word);
         if (node) {
-            highlightNodeYellow(node);
-            setTimeout(() => avl.drawFullTree(), 2000);
+            avl.highlightNode(node, "yellow");
         }
-    }
+    };
 
-    function deleteValue() {
+    document.getElementById("delete").onclick = async () => {
         const word = numberInput.value.trim();
         if (!word) return;
 
-        avl.root = avl.delete(avl.root, word);
-        avl.drawFullTree();
-    }
+        await avl.deleteDynamic(word); // Dynamic deletion process
+    };
 
-    function highlightNodeYellow(node) {
-        avl.ctx.fillStyle = "yellow";
-        avl.ctx.fillRect(node.x - 35, node.y - 25, 70, 50);
-        avl.drawNode(node);
-    }
-
-    function popup() {
+    document.getElementById("array").onclick = () => {
         const popupContainer = document.querySelector(".popup-container");
         const closeBtn = document.querySelector(".close-btn");
         const popupMessage = document.getElementById("popup-message");
@@ -54,5 +40,5 @@
         closeBtn.onclick = () => {
             popupContainer.classList.remove("active");
         };
-    }
+    };
 })();

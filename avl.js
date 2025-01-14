@@ -17,69 +17,47 @@ class AVLTree {
         this.ctx = this.canvas.getContext("2d");
     }
 
-    getHeight(node) {
-        return node ? node.height : 0;
+    delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    getBalanceFactor(node) {
-        return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
+    async insertDynamic(word) {
+        this.root = await this.insert(this.root, word, true);
     }
 
-    rightRotate(y) {
-        const x = y.left;
-        const T2 = x.right;
-
-        x.right = y;
-        y.left = T2;
-
-        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
-        x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
-
-        return x;
-    }
-
-    leftRotate(x) {
-        const y = x.right;
-        const T2 = y.left;
-
-        y.left = x;
-        x.right = T2;
-
-        x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
-        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
-
-        return y;
-    }
-
-    compareWords(word1, word2) {
-        let i = 0;
-        while (i < word1.length && i < word2.length) {
-            if (word1.charCodeAt(i) < word2.charCodeAt(i)) return -1;
-            if (word1.charCodeAt(i) > word2.charCodeAt(i)) return 1;
-            i++;
+    async insert(node, word, dynamic = false) {
+        if (!node) {
+            const newNode = new Node(word);
+            if (dynamic) {
+                this.drawFullTree();
+                await this.delay(500);
+            }
+            return newNode;
         }
-        if (word1.length < word2.length) return -1;
-        if (word1.length > word2.length) return 1;
-        return 0;
-    }
-
-    insert(node, word) {
-        if (!node) return new Node(word);
 
         const comparison = this.compareWords(word, node.word);
         if (comparison < 0) {
-            node.left = this.insert(node.left, word);
+            node.left = await this.insert(node.left, word, dynamic);
         } else if (comparison > 0) {
-            node.right = this.insert(node.right, word);
+            node.right = await this.insert(node.right, word, dynamic);
         } else {
-            return node; // Duplicate words are not allowed
+            return node;
         }
 
         node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
         const balance = this.getBalanceFactor(node);
 
-        if (balance > 1 && this.compareWords(word, node.left.word) < 0) return this.rightRotate(node);
-        if (balance < -1 && this.compareWords(word, node.right.word) > 0) return this.leftRotate(node);
+        if (dynamic) {
+            this.drawFullTree();
+            await this.delay(500);
+        }
+
+        if (balance > 1 && this.compareWords(word, node.left.word) < 0) {
+            return this.rightRotate(node);
+        }
+        if (balance < -1 && this.compareWords(word, node.right.word) > 0) {
+            return this.leftRotate(node);
+        }
         if (balance > 1 && this.compareWords(word, node.left.word) > 0) {
             node.left = this.leftRotate(node.left);
             return this.rightRotate(node);
@@ -92,22 +70,25 @@ class AVLTree {
         return node;
     }
 
-    delete(node, word) {
+    async deleteDynamic(word) {
+        this.root = await this.delete(this.root, word, true);
+    }
+
+    async delete(node, word, dynamic = false) {
         if (!node) return node;
 
         const comparison = this.compareWords(word, node.word);
         if (comparison < 0) {
-            node.left = this.delete(node.left, word);
+            node.left = await this.delete(node.left, word, dynamic);
         } else if (comparison > 0) {
-            node.right = this.delete(node.right, word);
+            node.right = await this.delete(node.right, word, dynamic);
         } else {
             if (!node.left || !node.right) {
                 node = node.left ? node.left : node.right;
             } else {
                 const minValueNode = this.getMinValueNode(node.right);
                 node.word = minValueNode.word;
-                node.value = minValueNode.value;
-                node.right = this.delete(node.right, minValueNode.word);
+                node.right = await this.delete(node.right, minValueNode.word, dynamic);
             }
         }
 
@@ -115,6 +96,11 @@ class AVLTree {
 
         node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
         const balance = this.getBalanceFactor(node);
+
+        if (dynamic) {
+            this.drawFullTree();
+            await this.delay(500);
+        }
 
         if (balance > 1 && this.getBalanceFactor(node.left) >= 0) return this.rightRotate(node);
         if (balance > 1 && this.getBalanceFactor(node.left) < 0) {
@@ -129,6 +115,13 @@ class AVLTree {
 
         return node;
     }
+
+    highlightNode(node, color) {
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(node.x - 35, node.y - 25, 70, 50);
+        this.drawNode(node);
+    }
+
 
     getMinValueNode(node) {
         let current = node;
