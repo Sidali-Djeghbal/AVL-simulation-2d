@@ -15,6 +15,7 @@ class AVLTree {
         this.root = null;
         this.canvas = document.getElementById("canvas");
         this.ctx = this.canvas.getContext("2d");
+        console.log("Canvas initialized:", this.canvas, this.ctx);
     }
 
     delay(ms) {
@@ -22,13 +23,16 @@ class AVLTree {
     }
 
     async insertDynamic(word) {
+        console.log("Starting dynamic insertion for:", word);
         this.root = await this.insert(this.root, word, true);
+        console.log("Dynamic insertion complete.");
     }
 
     async insert(node, word, dynamic = false) {
         if (!node) {
             const newNode = new Node(word);
             if (dynamic) {
+                console.log("Creating new node:", newNode);
                 this.drawFullTree();
                 await this.delay(500);
             }
@@ -48,7 +52,8 @@ class AVLTree {
         const balance = this.getBalanceFactor(node);
 
         if (dynamic) {
-            this.drawFullTree();
+            console.log("Updating node:", node, "Balance factor:", balance);
+            this.updateTreePositions(this.root, this.canvas.width / 2, 30, this.canvas.width / 4); // Smooth update
             await this.delay(500);
         }
 
@@ -70,144 +75,68 @@ class AVLTree {
         return node;
     }
 
-    async deleteDynamic(word) {
-        this.root = await this.delete(this.root, word, true);
-    }
-
-    async delete(node, word, dynamic = false) {
-        if (!node) return node;
-
-        const comparison = this.compareWords(word, node.word);
-        if (comparison < 0) {
-            node.left = await this.delete(node.left, word, dynamic);
-        } else if (comparison > 0) {
-            node.right = await this.delete(node.right, word, dynamic);
-        } else {
-            if (!node.left || !node.right) {
-                node = node.left ? node.left : node.right;
-            } else {
-                const minValueNode = this.getMinValueNode(node.right);
-                node.word = minValueNode.word;
-                node.right = await this.delete(node.right, minValueNode.word, dynamic);
-            }
-        }
-
-        if (!node) return node;
-
-        node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
-        const balance = this.getBalanceFactor(node);
-
-        if (dynamic) {
-            this.drawFullTree();
-            await this.delay(500);
-        }
-
-        if (balance > 1 && this.getBalanceFactor(node.left) >= 0) return this.rightRotate(node);
-        if (balance > 1 && this.getBalanceFactor(node.left) < 0) {
-            node.left = this.leftRotate(node.left);
-            return this.rightRotate(node);
-        }
-        if (balance < -1 && this.getBalanceFactor(node.right) <= 0) return this.leftRotate(node);
-        if (balance < -1 && this.getBalanceFactor(node.right) > 0) {
-            node.right = this.rightRotate(node.right);
-            return this.leftRotate(node);
-        }
-
-        return node;
-    }
-
     highlightNode(node, color) {
+        console.log("Highlighting node:", node, "Color:", color);
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(node.x - 35, node.y - 25, 70, 50);
-        this.drawNode(node);
+        this.ctx.beginPath();
+        this.ctx.arc(node.x, node.y, 25, 0, 2 * Math.PI);
+        this.ctx.fill();
+        this.ctx.stroke();
     }
 
-
-    getMinValueNode(node) {
-        let current = node;
-        while (current.left) {
-            current = current.left;
-        }
-        return current;
-    }
-
-    search(node, word) {
-        if (!node) return null;
-        const comparison = this.compareWords(word, node.word);
-        if (comparison === 0) return node;
-        return comparison < 0 ? this.search(node.left, word) : this.search(node.right, word);
-    }
-
-    inOrder(cb, root = this.root) {
-        if (!root) return;
-        this.inOrder(cb, root.left);
-        cb(root);
-        this.inOrder(cb, root.right);
-    }
-
-    drawTree(node, x, y, dx) {
+    async updateTreePositions(node, x, y, dx) {
         if (node) {
-            node.x = x;
-            node.y = y;
-            this.drawTree(node.left, x - dx, y + 60, dx / 2);
-            this.drawTree(node.right, x + dx, y + 60, dx / 2);
+            const targetX = x;
+            const targetY = y;
+            await this.animateNodePosition(node, targetX, targetY);
+
+            await this.updateTreePositions(node.left, x - dx, y + 60, dx / 2);
+            await this.updateTreePositions(node.right, x + dx, y + 60, dx / 2);
         }
     }
 
-    drawNode(node) {
-        if (!node) return;
-        const depth = Math.floor(node.y / 60);
-        const colors = ["#FF5733", "#008000", "#3357FF", "#FFD433", "#D433FF", "#33FFF5"];
-        const color = colors[depth % colors.length];
+    async animateNodePosition(node, targetX, targetY, duration = 500) {
+        const startX = node.x;
+        const startY = node.y;
+        const startTime = performance.now();
 
-        // Draw the node as a rectangle
-        this.ctx.fillStyle = color;
-        this.ctx.fillRect(node.x - 30, node.y - 20, 60, 40);
-        this.ctx.strokeRect(node.x - 30, node.y - 20, 60, 40);
+        const animate = (time) => {
+            const elapsedTime = time - startTime;
+            const progress = Math.min(elapsedTime / duration, 1);
 
-        // Draw the word inside the node
-        this.ctx.fillStyle = "black";
-        this.ctx.font = "16px Arial";
-        this.ctx.textAlign = "center";
-        this.ctx.textBaseline = "middle";
-        this.ctx.fillText(node.word, node.x, node.y);
+            node.x = startX + (targetX - startX) * progress;
+            node.y = startY + (targetY - startY) * progress;
 
-        // Draw the balance factor in a small square
-        const balance = this.getBalanceFactor(node);
-        this.ctx.fillStyle = "white";
-        this.ctx.fillRect(node.x + 25, node.y - 25, 20, 20);
-        this.ctx.strokeRect(node.x + 25, node.y - 25, 20, 20);
-        this.ctx.fillStyle = "black";
-        this.ctx.fillText(balance, node.x + 35, node.y - 15);
-    }
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.drawConnections(this.root);
+            this.drawAllNodes(this.root);
 
-    drawConnections(node) {
-        if (node.left) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(node.x, node.y);
-            this.ctx.lineTo(node.left.x, node.left.y);
-            this.ctx.stroke();
-            this.ctx.closePath();
-            this.drawConnections(node.left);
-        }
-        if (node.right) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(node.x, node.y);
-            this.ctx.lineTo(node.right.x, node.right.y);
-            this.ctx.stroke();
-            this.ctx.closePath();
-            this.drawConnections(node.right);
-        }
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        return new Promise((resolve) => {
+            const frame = (time) => {
+                animate(time);
+                if (node.x === targetX && node.y === targetY) {
+                    resolve();
+                } else {
+                    requestAnimationFrame(frame);
+                }
+            };
+            requestAnimationFrame(frame);
+        });
     }
 
     drawFullTree() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         if (this.root) {
-            this.drawTree(this.root, this.canvas.width / 2, 30, this.canvas.width / 4);
-            this.drawConnections(this.root);
-            this.drawAllNodes(this.root);
+            this.updateTreePositions(this.root, this.canvas.width / 2, 30, this.canvas.width / 4);
         }
     }
+
+
 
     drawAllNodes(node) {
         if (node) {
@@ -217,3 +146,4 @@ class AVLTree {
         }
     }
 }
+

@@ -6,6 +6,7 @@
         const word = numberInput.value.trim();
         if (!word) return;
 
+        console.log("Inserting node:", word);
         await avl.insertDynamic(word); // Dynamic insertion process
     };
 
@@ -15,7 +16,10 @@
 
         const node = avl.search(avl.root, word);
         if (node) {
+            console.log("Node found:", node);
             avl.highlightNode(node, "yellow");
+        } else {
+            console.log("Node not found:", word);
         }
     };
 
@@ -23,6 +27,7 @@
         const word = numberInput.value.trim();
         if (!word) return;
 
+        console.log("Deleting node:", word);
         await avl.deleteDynamic(word); // Dynamic deletion process
     };
 
