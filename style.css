@@ -44,6 +44,7 @@ input[type="text"] {
     flex: 2;
 }
 
+
 button {
     padding: 10px 15px;
     color: rgb(255, 255, 255);
@@ -61,7 +62,7 @@ button:hover {
 }
 
 #nodeValue {
-    width: 200px;
+    width: 250px;
 }
 
 #add {
@@ -88,7 +89,7 @@ button:hover {
 
 @media screen and (max-width: 800px) {
     h1 {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
     }
 
     canvas {
@@ -105,8 +106,14 @@ button:hover {
         width: 90%;
     }
 
-    button {
-        width: 90%;
+    #nodeValue {
+        width: 250px;
     }
-    
+
+
+
+    button {
+        width: 80%;
+    }
 }
+

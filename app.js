@@ -6,6 +6,32 @@
     document.getElementById("search").onclick = searchValue;
     document.getElementById("delete").onclick = deleteValue;
 
+    // Function to display the initial message
+    function displayInitialMessage() {
+        avl.ctx.font = "20px Arial";
+        avl.ctx.fillStyle = "black";
+        avl.ctx.textAlign = "center";
+        avl.ctx.textBaseline = "middle";
+
+        // Multi-line explanation
+        const messages = [
+            "Welcome to AVL Tree Simulation! 🌳",
+            "This AVL tree works with both numbers and words.",
+            "For words, it compares them alphabetically based on their first letter.",
+            "If two words start with the same letter, it continues comparing the next letters.",
+            "The tree automatically balances itself to maintain optimal performance.",
+            "Enter a word or number and click 'Insert' to start."
+        ];
+
+        let yOffset = avl.canvas.height / 2 - 100; // Starting Y position
+        messages.forEach((msg, index) => {
+            avl.ctx.fillText(msg, avl.canvas.width / 2, yOffset + index * 30);
+        });
+    }
+
+    // Display the initial message when the program starts
+    displayInitialMessage();
+
     function animateNodePosition(node, targetX, targetY, duration = 500) {
         const startX = node.x;
         const startY = node.y;
@@ -54,8 +80,16 @@
         const value = wordInput.value.trim();
         if (!value) return;
 
+        // Remove the initial message when the first node is inserted
+        if (!avl.root) {
+            avl.ctx.clearRect(0, 0, avl.canvas.width, avl.canvas.height);
+        }
+
         avl.root = avl.insert(avl.root, value);
         avl.drawFullTree();
+
+        // Clear the input field after insertion
+        wordInput.value = "";
     }
 
     function searchValue() {
@@ -70,6 +104,9 @@
             highlightNode(result, "yellow");
             setTimeout(() => avl.drawFullTree(), 3000);
         }
+
+        // Clear the input field after search
+        wordInput.value = "";
     }
 
     function deleteValue() {
@@ -86,6 +123,9 @@
                 avl.drawFullTree();
             }, 2000);
         }
+
+        // Clear the input field after deletion
+        wordInput.value = "";
     }
 
     function searchWithPath(node, value, path = []) {
@@ -136,5 +176,4 @@
         avl.ctx.fillStyle = "#000";
         avl.ctx.fillText(balanceFactor, node.x + 45, node.y - 10);
     }
-
 })();

@@ -135,23 +135,23 @@ class AVLTree {
 
     drawNode(node) {
         if (!node) return;
-        const rectWidth = 60;
-        const rectHeight = 40;
+        const rectWidth = 55;
+        const rectHeight = 35;
         this.ctx.fillStyle = "#00A";
         this.ctx.fillRect(node.x - rectWidth / 2, node.y - rectHeight / 2, rectWidth, rectHeight);
         this.ctx.strokeRect(node.x - rectWidth / 2, node.y - rectHeight / 2, rectWidth, rectHeight);
         this.ctx.fillStyle = "white";
-        this.ctx.font = "20px Arial";
+        this.ctx.font = "16px Arial";
         this.ctx.textAlign = "center";
         this.ctx.fillText(node.value, node.x, node.y);
 
         // Draw balance factor square
         const balanceFactor = this.getBalanceFactor(node);
         this.ctx.fillStyle = "#fff";
-        this.ctx.fillRect(node.x + 40, node.y - 25, 25, 25);
-        this.ctx.strokeRect(node.x + 40, node.y - 25, 25, 25);
+        this.ctx.fillRect(node.x + 20, node.y - 25, 25, 25);
+        this.ctx.strokeRect(node.x + 20, node.y - 25, 25, 25);
         this.ctx.fillStyle = "#000";
-        this.ctx.fillText(balanceFactor, node.x + 50, node.y - 10);
+        this.ctx.fillText(balanceFactor, node.x + 33, node.y - 8);
     }
 
     drawConnections(node) {
