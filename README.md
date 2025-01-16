@@ -38,5 +38,5 @@ You can experience the app directly here: **[AVL Tree Web App](https://sfsd-avl.
 ### Installation
 1. Clone or download the repository:
    ```bash
-   git clone https://github.com/your-username/avl-tree-visualization.git
-   cd avl-tree-visualization
+   git clone https://github.com/Sidali-Djeghbal/avl-js.git
+   cd avl-js
