@@ -42,7 +42,6 @@ canvas {
     justify-content: center;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 20px; /* Add some space below the inputs */
 }
 
 input[type="text"] {
@@ -96,7 +95,7 @@ button:hover {
 }
 
 footer {
-    margin-top: 10px;
+    margin-bottom: 10px;
     color: white;
     font-size: 14px;
     text-align: center;
@@ -114,6 +113,8 @@ footer a:hover {
 @media screen and (max-width: 800px) {
     h1 {
         font-size: 1.2rem;
+        margin-top: 0.9rem;
+
     }
 
     canvas {
@@ -123,7 +124,7 @@ footer a:hover {
 
     .inputs {
         flex-direction: column;
-        gap: 0.8rem;
+        gap: 0.6rem;
     }
 
     input[type="text"] {
