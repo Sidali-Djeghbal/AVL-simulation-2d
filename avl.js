@@ -45,7 +45,23 @@ class AVLTree {
     }
 
     compareWords(word1, word2) {
-        return word1.localeCompare(word2);
+        // Check if both values are numbers
+        const isNumber1 = !isNaN(word1) && !isNaN(parseFloat(word1));
+        const isNumber2 = !isNaN(word2) && !isNaN(parseFloat(word2));
+
+        if (isNumber1 && isNumber2) {
+            // Compare as numbers
+            return parseFloat(word1) - parseFloat(word2);
+        } else if (isNumber1) {
+            // If word1 is a number and word2 is not, word1 is considered smaller
+            return -1;
+        } else if (isNumber2) {
+            // If word2 is a number and word1 is not, word2 is considered smaller
+            return 1;
+        } else {
+            // Compare as strings (words)
+            return word1.localeCompare(word2);
+        }
     }
 
     insert(node, value) {
@@ -187,5 +203,4 @@ class AVLTree {
             this.drawAllNodes(node.right);
         }
     }
-
 }
