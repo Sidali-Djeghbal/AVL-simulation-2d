@@ -119,12 +119,15 @@ footer a:hover {
 
     canvas {
         width: 90%;
-        height: 90%;
+        height: 80%;
+        margin-bottom: -8px;
+
     }
 
     .inputs {
         flex-direction: column;
         gap: 0.6rem;
+        margin-bottom: -15px;
     }
 
     input[type="text"] {
@@ -138,4 +141,6 @@ footer a:hover {
     button {
         width: 80%;
     }
+
+
 }
